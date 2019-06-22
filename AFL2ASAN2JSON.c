@@ -14,29 +14,32 @@ Step 5) Generate ASAN logs. Run a bash loop with the binary against duplicated f
 Step 6) Parse ASAN logs.
 Step 7) Build a JSON payload to send to API endpoint. 
 */
-char main(){
+
+char createDirectories(){
 
 	//make init directories
 	printf("%s", "[X]Creating directories: \n[o]A2A2J/\n[o]A2A2J/ASANLOGS/\n[o]A2A2J/DUPL_CRASH_FILES/\n\n");
 	mkdir("/A2A2J", 0755);
 	mkdir("/A2A2J/ASANLOGS/", 0755);
 	mkdir("/A2A2J/DUPL_CRASH_FILES/",0755); 
+	return 0;
+	
+}
+
+char main(){
+	createDirectories();
 
 	//request out/ folder for AFL instances
 	printf("%s", "[X]Where is our out/ folder from AFL?\n[o]Expected input: /path/to/AFL/out/\n[o]Maximum 301 character limit:\n\n"); //try to avoid BOF
-	char aflcrashesLocation[305]; //hope your hostname is short
+	char aflcrashesLocation[305] = "0"; //hope your hostname is short
 	fgets(aflcrashesLocation, sizeof(aflcrashesLocation), stdin); //write your input to string
-		if( aflcrashesLocation == NULL ){
-			exit(EXIT_FAILURE);
-		}
+
 
 	//request ASAN instrumented binary for generating logs
 	printf("%s", "\n[X]What is our ASAN Binary to generate our ASAN logs? [o]Input expected: /here/is/the/binary.somefile\n[o]Maximum 301 character limit:\n\n");
-	char asanbinarylocation[305];
+	char asanbinarylocation[305] = "0";
 	fgets(asanbinarylocation, sizeof(asanbinarylocation), stdin);
-		if( asanbinarylocation == NULL ){
-			exit(EXIT_FAILURE);
-		}
+
 
 	//first bash loop to copy crash files to duplicate folder
 	char commandString[500];
@@ -55,17 +58,9 @@ char main(){
     char asanLog[50] = " &> /A2A2J/ASANLOGS/ASANLOG.txt"; 
 
 	strcat(runBin, summonBashAgain);
-	strcat(runBin, asanbinarylocation); 
+	strcat(runBin, asanbinarylocation); //such a copout from a loop I know. Don't know if you can force STDERR to a file in C nicely.
 	strcat(runBin, asanLog);
 
 	system(runBin); //create logs
 
 }
-
-//PARSE OUR NEW LOGS FOR USEFUL INFORMATION
-//PARSE VIA KEYWORD SUMMARY
-//PARSE VIA KEYWORD FUNCTION
-//PARSE VIA KEYWORD SIGACTION
-//RANK VIA SEVERITY?
-//PUSH PARSES TO JSON BLOCK 
-//SEND JSON BLOCK TO API ENDPOINT
