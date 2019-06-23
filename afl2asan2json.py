@@ -32,7 +32,7 @@ Y = YEL + "[!]" + END
 BLU = '\033[94m'
 
 
-print ( Y + "Requires jq tool.")
+print (Y + "Requires jq tool.")
 
 #Let's start building our work directories. Hit enter to just skip this all if they exist.
 buildDirs = raw_input(R + "Create work directories? y/n/anything else to skip ")
@@ -127,7 +127,7 @@ if generateASANLOG == "y":
 #Color format blue for important locations.
 	B1 = BLU + directory4 + fileName + ".sh" + END
 #Create scriptlog and write command to it for execution.
-	writeScript = open(r"/A2A2J/COMMAND_LOGS/" + fileName + ".sh","w+") 
+	writeScript = open(r"/A2A2J/COMMAND_LOGS/" + fileName + ".sh", "w+") 
 	writeScript.write(str(bashCommand))
 	writeScript.close()
 	print (G + "Built script " + B1 + " to generate ASAN logs.")
@@ -152,11 +152,11 @@ if os.path.isfile(crashLog):
 	s = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
 #Check for a known string in AddressSanitizer logs.
 	if s.find(b'AddressSanitizer:') != -1:
-    	print(G + 'We have successfully found our AddressSanitizer strings in our ASANLOG!')
-    	validityCheck.close()
-    else:
+		print(G + 'We have successfully found our AddressSanitizer strings in our ASANLOG!')
+		validityCheck.close()
+	else:
     	print (Y + "Something went wrong with our logs. We can't find an AddressSanitizer string in them to parse.")
-    	validityCheck.close()
+		validityCheck.close()
     	exit(1)
 else:
 	print (Y + "Nothing at" + BLU + str(crashLog) + "?" + END)
@@ -173,7 +173,7 @@ if createJSON == "y":
 	print(G + "Built block files. Converting to JSON to be parsed by endpoint.")
 	print(Y + "This can take a minute because of the number of files and cleanup. Please wait.")
 #We convert each file to a JSON format.
-	asan2JSON = "for i in $(ls); do jq -R -s -c 'split(\"\n\")' $i > $i.json; done && find . -type f  ! -name \"*.json\"  -delete" 
+	asan2JSON = "for i in $(ls); do jq -R -s -c 'split(\"\n\")' $i > $i.json; done && find . -type f  ! -name \"*.json\"  -delete"
 	os.system(asan2JSON)
 	print(G + "Individual JSON block files based on ASAN logs from AFL's crash files are now ready to be sent upstream to your API!")
 	exit(1)
