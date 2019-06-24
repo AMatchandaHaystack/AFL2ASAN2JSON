@@ -110,6 +110,7 @@ os.system("echo \"\" >" + str(crashLog))
 if generateASANLOG == "y":
 #Build script to generate ASAN logs.
 	if switchOps == "":
+#Add the FILE:$filename to the ASANLog so we can check it out later!
 		bashCommand = "for i in $(ls " + str(directory3) + "*); do echo FILE:$i 1>&2 & " + str(asanBinary) + " $i " + "; done >> " + str(crashLog)
 	else:
 		bashCommand = "for i in $(ls " + str(directory3) + "*); do echo FILE:$i 1>&2 & " + str(asanBinary) + " " + str(switchOps) + " $i " + "; done >> " + str(crashLog)
@@ -165,7 +166,8 @@ if createJSON == "y":
 	print(G + "Parsing " + BLU + crashLog + END + "...")
 #AWK magic makes a file for each match in the ASAN output pattern.
 	os.chdir(directory5)
-	individualLogs = "awk -v RS=\"ERROR\" 'NR > 1 {print RS $0 > (NR-1); close(NR-1)}' <" + str(crashLog)
+#I changed this from ERROR to FILE to hopefully parse each one by the filename from the DUPL_CRASH_FILE directory.
+	individualLogs = "awk -v RS=\"FILE\" 'NR > 1 {print RS $0 > (NR-1); close(NR-1)}' <" + str(crashLog)
 	os.system(individualLogs)
 	print(G + "Built block files. Converting to JSON to be parsed by endpoint.")
 	print(Y + "This can take a minute because of the number of files and cleanup. Please wait.")
