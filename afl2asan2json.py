@@ -113,7 +113,7 @@ if generateASANLOG == "y":
 		bashCommand = "for i in $(ls " + str(directory3) + "*); do echo FILE:$i 1>&2 & " + str(asanBinary) + " $i " + "; done >> " + str(crashLog)
 	else:
 		bashCommand = "for i in $(ls " + str(directory3) + "*); do echo FILE:$i 1>&2 & " + str(asanBinary) + " " + str(switchOps) + " $i " + "; done >> " + str(crashLog)
-	print (bashCommand)
+
 	print (Y + "Built your script schema as: " + BLU + str(asanBinary) + str(switchOps) + " $targetfile." + END)
 	print (Y + "Please review carefully as this cannot account for all particular binary inputs.")
 	print (Y + "You may need to modify the bash command in a2a2j source (bashCommand variable) to match your particular binary.\n")
