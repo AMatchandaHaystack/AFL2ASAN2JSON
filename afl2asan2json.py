@@ -110,11 +110,12 @@ os.system("echo \"\" >" + str(crashLog))
 if generateASANLOG == "y":
 #Build script to generate ASAN logs.
 	if switchOps == "":
-		bashCommand = "for i in " + str(directory3) + "*; do " + str(asanBinary) + " $i && echo FILE:$i >>" + directory2 + "ASANLOG.txt; done"
+		bashCommand = "for i in $(ls " + str(directory3) + "*); do echo FILE:$i 1>&2 & " + str(asanBinary) + " $i " + "; done >> " + str(crashLog)
 	else:
-		bashCommand = "for i in " + str(directory3) + "*; do " + str(asanBinary) + " " + str(switchOps) + " $i && echo FILE:$i >>" + directory2 + "ASANLOG.txt; done"
-	print (Y + "Built your script as: " + BLU + str(bashCommand) + str(switchOps) + END + ".")
-	print (Y + "Please review carefully.")
+		bashCommand = "for i in $(ls " + str(directory3) + "*); do echo FILE:$i 1>&2 & " + str(asanBinary) + " " + str(switchOps) + " $i " + "; done >> " + str(crashLog)
+	print (bashCommand)
+	print (Y + "Built your script schema as: " + BLU + str(asanBinary) + str(switchOps) + " $targetfile." + END)
+	print (Y + "Please review carefully as this cannot account for all particular binary inputs.")
 	print (Y + "You may need to modify the bash command in a2a2j source (bashCommand variable) to match your particular binary.\n")
 	commandGood = raw_input(R + "Does this command appear correct? Only 'y' to continue. ")
 	if commandGood != "y":
@@ -141,7 +142,7 @@ if generateASANLOG == "y":
 	executeScript = "/bin/bash " + str(directory4) + str(fileName) + ".sh"
 	print(G + "Generating!")
 	print (Y + "This can take several minutes depending on the binary's speed, the number of crash files, and other factors.")
-	os.system(executeScript + " 1> /dev/null 2>" + str(directory2) + "/ASANLOG.txt && echo \"FINISHED_FINISHED_FINISHED\" >> " + str(directory2) + "ASANLOG.txt")
+	os.system(executeScript + " 1> /dev/null 2>" + str(crashLog))
 	print(G + "Done!\n")
 else:
 	print (Y + "Skipped.")
@@ -166,7 +167,7 @@ if createJSON == "y":
 	os.chdir(directory5)
 	individualLogs = "awk -v RS=\"ERROR\" 'NR > 1 {print RS $0 > (NR-1); close(NR-1)}' <" + str(crashLog)
 	os.system(individualLogs)
-	print(G + "Built block files. Converting to JSON to be parsed by endpoint.\n")
+	print(G + "Built block files. Converting to JSON to be parsed by endpoint.")
 	print(Y + "This can take a minute because of the number of files and cleanup. Please wait.")
 #We convert each file to a JSON format.
 	asan2JSON = "for i in $(ls); do jq -R -s -c 'split(\"\n\")' $i > $i.json; done && find . -type f  ! -name \"*.json\"  -delete"
