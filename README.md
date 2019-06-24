@@ -5,27 +5,18 @@ root@fuzzbox:/home/Desktop# python afl2asan2json.py
 
 [!]Requires jq tool.
 [?]Create work directories? y/n/anything else to skip y
-
 [o]Creating work directory: /A2A2J/
-
 [o]Creating work directory: /A2A2J/ASANLOGS/
-
 [o]Creating work directory: /A2A2J/COMMAND_LOGS/
-
 [o]Creating work directory: /A2A2J/DUPL_CRASH_FILES/
-
 [o]Creating work directory: /A2A2J/JSON_BLOCK_FILES/
-
 [o]Created directories.
 
 
 
 [?]Where is the location for the ASAN-compiled binary? File path like this:
-
 /exact/path/to/the/binary
-
 /home/Desktop/Fuzzers/targets/somebinary
-
 [o]Found. Your job to make sure it has ASAN enabled.
 
 
