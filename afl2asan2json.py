@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 import os
 import time
@@ -87,14 +87,13 @@ if os.path.isdir(crashLocation) is True:
 #COPY ORIGINAL CRASH FILES TO WORK DIRECTORY
 	copyFiles = raw_input(R + "Copy crash files to working directory? y/n/anything else to skip ")
 	if copyFiles == "y":
+		print(Y + "This can take a few minutes to finish copying.")
 		for directoryname in os.listdir(crashLocation):
 			crashFolders = crashLocation + directoryname + "/crashes/"
 			for filename in os.listdir(crashFolders):
 				crashFiles = crashFolders + filename
 #Copy all of the files found in all of the crashes folders found.
-				print(Y + "This can take a few minutes to finish copying.")
 				shutil.copy(crashFiles, directory3)
-				print (G + "Done!\n")
 	else:
 		print (Y + "Skipped.")
 elif os.path.isdir(crashLocation) is False:
@@ -103,14 +102,17 @@ elif os.path.isdir(crashLocation) is False:
 else:
 	print (Y + "Nothing? Skipped.")
 
+print (G + "Done!\n")
 #Run a bash for loop with our ASAN-compiled binary against all of the crash files.
 generateASANLOG = raw_input(R + "Generate ASANLOGS from ASAN Binary? y/n ")
+crashLog = str(directory2) + "ASANLOG.txt"
+os.system("echo \"\" >" + str(crashLog))
 if generateASANLOG == "y":
 #Build script to generate ASAN logs.
 	if switchOps == "":
-		bashCommand = "for i in " + str(directory3) + "*; do " + str(asanBinary) + " $i && echo FILE$i >>" + directory2 + "ASANLOG.txt; done"
+		bashCommand = "for i in " + str(directory3) + "*; do " + str(asanBinary) + " $i && echo FILE:$i >>" + directory2 + "ASANLOG.txt; done"
 	else:
-		bashCommand = "for i in " + str(directory3) + "*; do " + str(asanBinary) + " " + str(switchOps) + " $i && FILEecho $i >>" + directory2 + "ASANLOG.txt; done"
+		bashCommand = "for i in " + str(directory3) + "*; do " + str(asanBinary) + " " + str(switchOps) + " $i & echo FILE:$i >>" + directory2 + "ASANLOG.txt; done"
 	print (Y + "Built your script as: " + BLU + str(bashCommand) + str(switchOps) + END + ".")
 	print (Y + "Please review carefully.")
 	print (Y + "You may need to modify the bash command in a2a2j source (bashCommand variable) to match your particular binary.\n")
@@ -138,32 +140,26 @@ if generateASANLOG == "y":
 #Execute scriptlog.
 	executeScript = "/bin/bash " + str(directory4) + str(fileName) + ".sh"
 	print(G + "Generating!")
-	os.system(executeScript + " 1> /dev/null 2>" + str(directory2) + "/ASANLOG.txt ; echo \"FINISHED_FINISHED_FINISHED\" >> " + str(directory2) + "ASANLOG.txt")
+	print (Y + "This can take several minutes depending on the binary's speed, the number of crash files, and other factors.")
+	os.system(executeScript + " 1> /dev/null 2>" + str(directory2) + "/ASANLOG.txt && echo \"FINISHED_FINISHED_FINISHED\" >> " + str(directory2) + "ASANLOG.txt")
 	print(G + "Done!\n")
 else:
 	print (Y + "Skipped.")
 
-crashLog = "/A2A2J/ASANLOG/ASANLOG.txt"
-#JSON time
-#If our log exists, open it.
-if os.path.isfile(crashLog):
-#Read about this being a little easier on memory overhead in case we have like 50,000 crash files.
-	validityCheck = open(str(crashLog))
-	s = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
-#Check for a known string in AddressSanitizer logs.
-	if s.find(b'AddressSanitizer:') != -1:
-		print(G + 'We have successfully found our AddressSanitizer strings in our ASANLOG!')
+#Check for a known string in AddressSanitizer logs to make sure they are sane.
+print(Y + "Running quick sanity check on our logs.")
+with open(str(crashLog)) as validityCheck:
+	logStrings = validityCheck.readlines()
+	knownString = "AddressSanitizer:"
+	if str(knownString) in str(logStrings):
+		print(G + "Found AddressSanitizer strings in " + BLU + str(crashLog) + END + ". Log appears sane.\n")
 		validityCheck.close()
-	else:
-    	print (Y + "Something went wrong with our logs. We can't find an AddressSanitizer string in them to parse.")
-		validityCheck.close()
-    	exit(1)
-else:
-	print (Y + "Nothing at" + BLU + str(crashLog) + "?" + END)
-	exit(1)
+   	else: 
+   		print (Y + "Something went wrong with our logs. We can't find AddressSanitizer strings in them to parse.")
+   		validityCheck.close()
+   		exit(1)
 
-print(G + "Successfully found AddressSanitizer strings in " + BLU + str(crashLog) + END + "\n")
-createJSON = raw_input(R + "Parse logs to JSON payloads in" + BLU + directory5 + END + " ? y/n ")
+createJSON = raw_input(R + "Parse logs to JSON payloads in " + BLU + directory5 + END + " ? y/n ")
 if createJSON == "y":
 	print(G + "Parsing " + BLU + crashLog + END + "...")
 #AWK magic makes a file for each match in the ASAN output pattern.
