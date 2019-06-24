@@ -112,7 +112,7 @@ if generateASANLOG == "y":
 	if switchOps == "":
 		bashCommand = "for i in " + str(directory3) + "*; do " + str(asanBinary) + " $i && echo FILE:$i >>" + directory2 + "ASANLOG.txt; done"
 	else:
-		bashCommand = "for i in " + str(directory3) + "*; do " + str(asanBinary) + " " + str(switchOps) + " $i & echo FILE:$i >>" + directory2 + "ASANLOG.txt; done"
+		bashCommand = "for i in " + str(directory3) + "*; do " + str(asanBinary) + " " + str(switchOps) + " $i && echo FILE:$i >>" + directory2 + "ASANLOG.txt; done"
 	print (Y + "Built your script as: " + BLU + str(bashCommand) + str(switchOps) + END + ".")
 	print (Y + "Please review carefully.")
 	print (Y + "You may need to modify the bash command in a2a2j source (bashCommand variable) to match your particular binary.\n")
@@ -166,7 +166,7 @@ if createJSON == "y":
 	os.chdir(directory5)
 	individualLogs = "awk -v RS=\"ERROR\" 'NR > 1 {print RS $0 > (NR-1); close(NR-1)}' <" + str(crashLog)
 	os.system(individualLogs)
-	print(G + "Built block files. Converting to JSON to be parsed by endpoint.")
+	print(G + "Built block files. Converting to JSON to be parsed by endpoint.\n")
 	print(Y + "This can take a minute because of the number of files and cleanup. Please wait.")
 #We convert each file to a JSON format.
 	asan2JSON = "for i in $(ls); do jq -R -s -c 'split(\"\n\")' $i > $i.json; done && find . -type f  ! -name \"*.json\"  -delete"
