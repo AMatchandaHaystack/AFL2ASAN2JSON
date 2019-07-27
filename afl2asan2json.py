@@ -171,10 +171,47 @@ if createJSON == "y":
 	os.system(individualLogs)
 	print(G + "Built block files. Converting to JSON to be parsed by endpoint.")
 	print(Y + "This can take a minute because of the number of files and cleanup. Please wait.")
-#We convert each file to a JSON format.
-	asan2JSON = "for i in $(ls); do jq -R -s -c 'split(\"\n\")' $i > $i.json; done && find . -type f  ! -name \"*.json\"  -delete"
-	os.system(asan2JSON)
+
+	#We convert each file to a JSON format.
+	#Building a nicer, cleaner way to push the output.
+	###OLD WAY
+	#asan2JSON = "for i in $(ls); do jq -R -s -c 'split(\"\n\")' $i > $i.json; done && find . -type f  ! -name \"*.json\"  -delete"
+	#os.system(asan2JSON)
+
+	###NEW WAY NOT TESTED, SUSPECT DICTIONARY KEYS WON'T BE CONSIDERED CUMULATIVE:(
+	for parseFile in os.listdir(directory5):
+		with open(parseFile) as a2j:
+			for line in a2j:
+				while True:
+					fileDict = {}
+					fileDict['error'] = ""
+					fileDict['shadow_other'] = ""
+					fileDict['functionTrace'] = ""
+					if "ERROR" in line:
+						fileDict['error'] = str(line) + "\n"
+
+					elif "#" in line:
+						fileDict['functionTrace'] += str(line) + "\n"
+
+					elif "SUMMARY" in line:
+						fileDict['error'] += str(line) + "\n"
+
+					elif "FILE" in line:
+						fileDict['filename'] = str(line)
+
+					else:
+						fileDict['shadow_other'] += str(line)
+					
+					jsonPayload = str(parseFile) + ".json" 
+					with open(jsonPayload, 'w') as writeJSON:
+						json.dump(fileDict, writeJson)
+						file.close(jsonPayload)
+
+				else:
+					print ("This should not have happened. Something has gone wrong parsing and writing the JSON files.")
+	###END NEW WAY
 	print(G + "Individual JSON block files based on ASAN logs from AFL's crash files are now ready to be sent upstream to your API!")
 	exit(1)
 else:
 	exit(1)
+
